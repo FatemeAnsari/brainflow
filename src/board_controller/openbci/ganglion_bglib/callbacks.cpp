@@ -11,7 +11,7 @@
 #include "uart.h"
 
 
-#define GANGLION_SERVICE_UUID 0xfe84
+#define GANGLION_SERVICE_UUID 0xc566488a08824e1ba6d00b717e652234 // 0xfe84
 #define CLIENT_CHARACTERISTIC_UUID 0x2902
 
 namespace GanglionLib
@@ -30,11 +30,18 @@ namespace GanglionLib
     extern std::queue<struct GanglionLib::GanglionData> data_queue;
 
     // uuid - 2d30c083-f39f-4ce6-923f-3484ea480596
-    const int send_char_uuid_bytes[16] = {
-        150, 5, 72, 234, 132, 52, 63, 146, 230, 76, 159, 243, 131, 192, 48, 45};
+    //const int send_char_uuid_bytes[16] = {
+    //    150, 5, 72, 234, 132, 52, 63, 146, 230, 76, 159, 243, 131, 192, 48, 45};
     // uuid - 2d30c082-f39f-4ce6-923f-3484ea480596
+    //const int recv_char_uuid_bytes[16] = {
+    //    150, 5, 72, 234, 132, 52, 63, 146, 230, 76, 159, 243, 130, 192, 48, 45};
+
+	// uuid="4051eb11-bf0a-4c74-8730-a48f4193fcea" - Commands BITalino
+    const int send_char_uuid_bytes[16] = {
+        234, 252, 147, 65, 143, 164, 48, 135, 116, 76, 10, 191, 17, 235, 81, 64};
+    // uuid = "40fdba6b-672e-47c4-808a-e529adff3633" - Frames
     const int recv_char_uuid_bytes[16] = {
-        150, 5, 72, 234, 132, 52, 63, 146, 230, 76, 159, 243, 130, 192, 48, 45};
+        51, 54, 255, 173, 41, 229, 138, 128, 196, 71, 46, 103, 107, 186, 253, 64};
 }
 
 void ble_evt_gap_scan_response (const struct ble_msg_gap_scan_response_evt_t *msg)
@@ -106,7 +113,7 @@ void ble_evt_attclient_group_found (const struct ble_msg_attclient_group_found_e
         return;
     }
     uint16 uuid = (msg->uuid.data[1] << 8) | msg->uuid.data[0];
-    if (uuid == GANGLION_SERVICE_UUID)
+    if (msg->uuid.len == 16)
     {
         GanglionLib::ganglion_handle_start = msg->start;
         GanglionLib::ganglion_handle_end = msg->end;
@@ -147,7 +154,7 @@ void ble_evt_attclient_find_information_found (
 {
     if (GanglionLib::state == GanglionLib::State::OPEN_CALLED)
     {
-        if (msg->uuid.len == 2)
+        if ((GanglionLib::ganglion_handle_recv) && msg->uuid.len == 2)
         {
             uint16 uuid = (msg->uuid.data[1] << 8) | msg->uuid.data[0];
             if (uuid == CLIENT_CHARACTERISTIC_UUID)

@@ -35,13 +35,14 @@ Ganglion::Ganglion (struct BrainFlowInputParams params)
     initialized = false;
     num_channels = 13;
     state = (int)BrainFlowExitCodes::SYNC_TIMEOUT_ERROR;
-    start_command = "b";
-    stop_command = "s";
+    start_command = 22;  //"b";
+    stop_command = "\0"; //"s";
 
     std::string ganglionlib_path = "";
     std::string ganglionlib_name = "";
     char ganglionlib_dir[1024];
     bool res = get_dll_path (ganglionlib_dir);
+	
 #ifdef _WIN32
     if (sizeof (void *) == 4)
     {
