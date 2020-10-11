@@ -356,7 +356,7 @@ int string_to_brainflow_input_params (
         params->ip_address = config["ip_address"];
         params->timeout = config["timeout"];
         params->serial_number = config["serial_number"];
-        params->file = config["file"];
+        //params->file = config["file"];
         return (int)BrainFlowExitCodes::STATUS_OK;
     }
     catch (json::exception &e)
