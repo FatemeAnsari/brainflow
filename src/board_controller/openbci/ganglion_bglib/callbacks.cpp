@@ -1,6 +1,6 @@
 #include <ctype.h>
 #include <math.h>
-#include <queue>
+#include <deque>
 #include <stdlib.h>
 #include <string.h>
 
@@ -9,9 +9,9 @@
 #include "helpers.h"
 #include "timestamp.h"
 #include "uart.h"
+#include "ticket_lock.h"
 
-
-#define GANGLION_SERVICE_UUID 0xc566488a08824e1ba6d00b717e652234 // 0xfe84
+#define GANGLION_SERVICE_UUID 0xc566488a08824e1ba6d00b717e652234 
 #define CLIENT_CHARACTERISTIC_UUID 0x2902
 
 namespace GanglionLib
@@ -26,15 +26,9 @@ namespace GanglionLib
     extern volatile uint16 ganglion_handle_send;
     extern volatile uint16 client_char_handle;
     extern volatile State state;
+    extern TicketLock lock;
 
-    extern std::queue<struct GanglionLib::GanglionData> data_queue;
-
-    // uuid - 2d30c083-f39f-4ce6-923f-3484ea480596
-    //const int send_char_uuid_bytes[16] = {
-    //    150, 5, 72, 234, 132, 52, 63, 146, 230, 76, 159, 243, 131, 192, 48, 45};
-    // uuid - 2d30c082-f39f-4ce6-923f-3484ea480596
-    //const int recv_char_uuid_bytes[16] = {
-    //    150, 5, 72, 234, 132, 52, 63, 146, 230, 76, 159, 243, 130, 192, 48, 45};
+    extern std::deque<struct GanglionLib::GanglionData> data_queue;
 
 	// uuid="4051eb11-bf0a-4c74-8730-a48f4193fcea" - Commands BITalino
     const int send_char_uuid_bytes[16] = {
@@ -201,5 +195,8 @@ void ble_evt_attclient_attribute_value (const struct ble_msg_attclient_attribute
     memcpy (values, msg->value.data, msg->value.len * sizeof (unsigned char));
     double timestamp = get_timestamp ();
     struct GanglionLib::GanglionData data (values, timestamp);
-    GanglionLib::data_queue.push (data);
+    GanglionLib::lock.lock ();
+    GanglionLib::data_queue.push_back (data);
+    GanglionLib::lock.unlock ();
+
 }
