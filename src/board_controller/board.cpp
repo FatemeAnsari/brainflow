@@ -20,6 +20,8 @@ std::shared_ptr<spdlog::logger> Board::board_logger = spdlog::stderr_logger_mt (
 
 int Board::set_log_level (int level)
 {
+    
+    
     int log_level = level;
     if (level > 6)
     {
